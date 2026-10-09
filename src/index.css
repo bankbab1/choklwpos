@@ -1,0 +1,324 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 225 15% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 225 15% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 15% 12%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 10% 92%;
+    --secondary-foreground: 225 12% 30%;
+
+    --muted: 220 10% 94%;
+    --muted-foreground: 220 8% 46%;
+
+    --accent: 217 91% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 10% 88%;
+    --input: 220 10% 88%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.75rem;
+
+    --success: 152 60% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --surface: 220 10% 96%;
+    --surface-foreground: 225 12% 25%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 225 12% 30%;
+    --sidebar-primary: 38 92% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 10% 94%;
+    --sidebar-accent-foreground: 225 12% 30%;
+    --sidebar-border: 220 10% 88%;
+    --sidebar-ring: 38 92% 50%;
+  }
+
+  .dark {
+    /* 🌙 Base: less black, more breathable */
+    --background: 225 15% 13%;
+    /* was 10% */
+    --foreground: 40 10% 92%;
+
+    /* 🧱 Cards: more contrast from background */
+    --card: 225 12% 18%;
+    /* was 12% */
+    --card-foreground: 40 10% 92%;
+
+    --popover: 225 12% 20%;
+    --popover-foreground: 40 10% 92%;
+
+    /* 🔥 CHANGE THIS */
+    --primary: 217 70% 62%;
+    --primary-foreground: 0 0% 100%;
+
+    --accent: 217 70% 62%;
+    --accent-foreground: 0 0% 100%;
+
+    --ring: 217 70% 62%;
+
+    /* ---------------- */
+
+    --secondary: 225 10% 22%;
+    /* was 16% */
+    --secondary-foreground: 40 10% 82%;
+
+    --muted: 225 10% 24%;
+    /* was 18% */
+    --muted-foreground: 220 8% 65%;
+    /* brighter */
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 225 10% 30%;
+    /* was 26% */
+    --input: 225 10% 26%;
+
+
+
+    --radius: 0.75rem;
+
+    --success: 152 60% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --surface: 225 12% 15%;
+    /* was 10% */
+    --surface-foreground: 40 10% 85%;
+
+    --sidebar-background: 225 12% 15%;
+    --sidebar-foreground: 40 10% 80%;
+
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+
+    --sidebar-accent: 225 10% 16%;
+    --sidebar-accent-foreground: 40 10% 80%;
+
+    --sidebar-border: 225 10% 22%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+.app-container {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Noto Sans Thai', 'DM Sans', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+
+    /* Native-like UX: prevent long-press text selection across the app */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Re-enable selection for actual text-entry fields */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+}
+
+
+@layer components {
+  .pos-toast {
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    min-height: 60px;
+    font-size: 15px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  /* 👇 DARK MODE = swap (strong contrast) */
+  .dark .pos-toast {
+    background: hsl(var(--foreground));
+    color: hsl(var(--background));
+    border: none;
+  }
+
+}
+
+@keyframes cart-shake {
+  0% {
+    transform: translateX(0) scale(1);
+  }
+
+  20% {
+    transform: translateX(-4px) scale(1.05);
+  }
+
+  40% {
+    transform: translateX(4px) scale(1.05);
+  }
+
+  60% {
+    transform: translateX(-3px) scale(1.03);
+  }
+
+  80% {
+    transform: translateX(3px) scale(1.03);
+  }
+
+  100% {
+    transform: translateX(0) scale(1);
+  }
+}
+
+.cart-shake {
+  animation: cart-shake 0.4s ease;
+}
+
+.product-name-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  line-height: 1.2;
+  height: calc(1.2em * 2);
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@keyframes shake-strong {
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-6px);
+  }
+
+  40% {
+    transform: translateX(6px);
+  }
+
+  60% {
+    transform: translateX(-5px);
+  }
+
+  80% {
+    transform: translateX(5px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.animate-shake-strong {
+  animation: shake-strong 0.45s ease;
+}
+
+/* 🔥 Kill button look everywhere */
+[data-sonner-toast] [data-button] {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+
+  padding: 0 !important;
+  height: auto !important;
+
+  color: hsl(var(--background)) !important;
+  font-size: 12px;
+  font-weight: 600;
+
+  text-decoration: none;
+}
+
+[data-sonner-toast] [data-button]:hover {
+  text-decoration: underline;
+  background: transparent !important;
+}
+/* Normalize native date/time inputs on iOS Safari so they respect container width */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"] {
+  -webkit-appearance: none;
+  appearance: none;
+  min-width: 0;
+  max-width: 100%;
+}
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value,
+input[type="datetime-local"]::-webkit-date-and-time-value {
+  text-align: left;
+  min-width: 0;
+}
