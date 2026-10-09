@@ -47,12 +47,13 @@ const OrderStartSheet = ({ open, isOpening, isClosing, onClose, storeId, initial
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  const { takeawayEnabled, dineInEnabled, defaultOrderMode } = prefs;
   useEffect(() => {
-    if (!isOrderModeEnabled(prefs, mode)) {
-      setMode(prefs.defaultOrderMode);
+    if (!(mode === "takeaway" ? takeawayEnabled : dineInEnabled)) {
+      setMode(defaultOrderMode);
       setTableId(undefined);
     }
-  }, [mode, prefs.takeawayEnabled, prefs.dineInEnabled, prefs.defaultOrderMode]);
+  }, [mode, takeawayEnabled, dineInEnabled, defaultOrderMode]);
 
   const table = tables.find((t) => t.id === tableId);
   const needsTable = prefs.requireTable;
