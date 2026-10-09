@@ -14,3 +14,8 @@ export function orderPreferences(value?: Partial<OrderPreferences> | null): Orde
     : takeawayEnabled ? "takeaway" : "dine_in";
   return { takeawayEnabled, dineInEnabled, defaultOrderMode, requireTable: value?.requireTable !== false };
 }
+
+/** Current branch settings govern every explicit order-type change. */
+export function isOrderModeEnabled(prefs: OrderPreferences, mode: OrderMode): boolean {
+  return mode === "takeaway" ? prefs.takeawayEnabled : prefs.dineInEnabled;
+}

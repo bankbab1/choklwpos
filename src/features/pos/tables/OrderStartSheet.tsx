@@ -1,5 +1,5 @@
 import { useStores } from "../store/StoreProvider";
-import { orderPreferences } from "../store/orderPreferences";
+import { isOrderModeEnabled, orderPreferences } from "../store/orderPreferences";
 import { useEffect, useMemo, useState } from "react";
 import { Minus, Plus, ShoppingBag, UtensilsCrossed, Users } from "lucide-react";
 import { BaseSheet } from "@/features/pos/shared/BaseSheet";
@@ -34,22 +34,29 @@ const OrderStartSheet = ({ open, isOpening, isClosing, onClose, storeId, initial
   const tables = useMemo(() => tablesForStore(storeId).filter((t) => t.enabled), [tablesForStore, storeId]);
   const zones = useMemo(() => groupByZone(tables), [tables]);
 
-  const [mode, setMode] = useState<ServiceMode>(initial?.mode ?? prefs.defaultOrderMode);
+  const [mode, setMode] = useState<ServiceMode>(initial && isOrderModeEnabled(prefs, initial.mode) ? initial.mode : prefs.defaultOrderMode);
   const [tableId, setTableId] = useState<string | undefined>(initial?.tableId);
   const [guests, setGuests] = useState<number>(initial?.guests ?? 1);
 
   useEffect(() => {
     if (open && !isClosing) {
-      setMode(initial?.mode ?? prefs.defaultOrderMode);
+      setMode(initial && isOrderModeEnabled(prefs, initial.mode) ? initial.mode : prefs.defaultOrderMode);
       setTableId(initial?.tableId);
       setGuests(initial?.guests ?? 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  useEffect(() => {
+    if (!isOrderModeEnabled(prefs, mode)) {
+      setMode(prefs.defaultOrderMode);
+      setTableId(undefined);
+    }
+  }, [mode, prefs.takeawayEnabled, prefs.dineInEnabled, prefs.defaultOrderMode]);
+
   const table = tables.find((t) => t.id === tableId);
   const needsTable = prefs.requireTable;
-  const canConfirm = mode === "takeaway" || ((!needsTable || !!table) && guests >= 1);
+  const canConfirm = isOrderModeEnabled(prefs, mode) && (mode === "takeaway" || ((!needsTable || !!table) && guests >= 1));
   const overCapacity = table && guests > table.seats;
 
   const confirm = () => {
@@ -79,7 +86,7 @@ const OrderStartSheet = ({ open, isOpening, isClosing, onClose, storeId, initial
               {([
                 { id: "dine_in", label: "Dine-in", icon: UtensilsCrossed },
                 { id: "takeaway", label: "Takeaway", icon: ShoppingBag },
-              ] as const).filter((m) => m.id === "takeaway" ? prefs.takeawayEnabled || initial?.mode === "takeaway" : prefs.dineInEnabled || initial?.mode === "dine_in").map((m) => {
+              ] as const).filter((m) => isOrderModeEnabled(prefs, m.id)).map((m) => {
                 const on = mode === m.id;
                 const Icon = m.icon;
                 return (
