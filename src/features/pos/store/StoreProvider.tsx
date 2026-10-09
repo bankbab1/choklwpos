@@ -1,3 +1,4 @@
+import { orderPreferences, type OrderPreferences } from "./orderPreferences";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, ReactNode } from "react";
 
 export interface Store {
@@ -42,6 +43,7 @@ export interface Store {
   billFooterNote1: string;
   billFooterNote2: string;
 
+  orderPreferences?: OrderPreferences;
   enabled: boolean;
 }
 
@@ -87,13 +89,14 @@ export const createEmptyStore = (): Store => ({
   billFooterSub: "This is a bill — not a tax receipt",
   billFooterNote1: "",
   billFooterNote2: "",
+  orderPreferences: orderPreferences(),
   enabled: true,
 });
 
 /** Migrate v1 store records (with notes_line1-4) to v2 shape. */
 const migrate = (raw: any): Store => {
   const base = createEmptyStore();
-  const m = { ...base, ...raw, id: raw?.id || base.id };
+  const m = { ...base, ...raw, id: raw?.id || base.id, orderPreferences: orderPreferences(raw?.orderPreferences) };
   // best-effort lift of legacy notes_line* into structured fields
   const legacy = [raw?.notes_line1, raw?.notes_line2, raw?.notes_line3, raw?.notes_line4]
     .filter((l) => typeof l === "string" && l.trim()) as string[];
@@ -216,7 +219,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateStore = useCallback((s: Store) => {
-    setStores((prev) => prev.map((x) => (x.id === s.id ? s : x)));
+    setStores((prev) => prev.map((x) => (x.id === s.id ? { ...s, orderPreferences: orderPreferences(s.orderPreferences) } : x)));
   }, []);
 
   const removeStore = useCallback((id: string) => {

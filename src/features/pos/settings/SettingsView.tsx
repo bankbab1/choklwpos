@@ -112,6 +112,7 @@ const SettingsView = ({
           label: "Tables",
           desc: "Tables, zones & seats per branch",
           onClick: onOpenTables,
+          disabled: !onOpenTables,
           tone: "primary",
         },
         {
@@ -161,7 +162,7 @@ const SettingsView = ({
               {section.title}
             </h2>
             <div className="rounded-2xl border border-border bg-card overflow-hidden divide-y divide-border">
-              {section.rows.map((row) => {
+              {section.rows.filter((row) => row.label !== "Tables" || !!onOpenTables).map((row) => {
                 const Icon = row.icon;
                 const isPrimary = row.tone === "primary";
                 return (

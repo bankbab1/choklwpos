@@ -1,3 +1,4 @@
+import { orderPreferences } from "@/features/pos/store/orderPreferences";
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRef } from "react";
 import { Search, Sun, Moon, X, LayoutGrid, Rows3, ScanLine, Store, ChevronDown, Check, ShoppingBag, UtensilsCrossed } from "lucide-react";
@@ -744,6 +745,13 @@ const IndexInner = () => {
   // "At order start": the first product of a fresh cart asks Dine-in/Takeaway first.
   const selectProduct = (p: Product) => {
     if (cart.length === 0 && !cartService) {
+      const prefs = orderPreferences(activeStore?.orderPreferences);
+      if (prefs.defaultOrderMode === "takeaway" || !prefs.requireTable) {
+        setDraftService({ mode: prefs.defaultOrderMode, ...(prefs.defaultOrderMode === "dine_in" ? { guests: 1 } : {}) });
+        setSelectedProduct(p);
+        customizerSheet.openSheet();
+        return;
+      }
       setPendingProduct(p);
       orderStartSheet.openSheet();
       return;
@@ -1035,7 +1043,7 @@ const IndexInner = () => {
         {activeTab === "orders" && (
           <OrdersView onSelectOpen={handleFocusOpenOrder} onSelectCompleted={handleViewCompleted} />
         )}
-        {activeTab === "settings" && <SettingsView onOpenMaster={() => setShowMaster("product")} onOpenCategoryMaster={() => setShowMaster("category")} onOpenBankAccounts={() => setShowBank(true)} onOpenStores={() => setShowStores(true)} onOpenReceiptTemplate={() => setShowReceiptTemplate(true)} onOpenPromotions={() => setShowPromotions(true)} onOpenDiscountMaster={() => setShowDiscountMaster(true)} onOpenTables={() => setShowTables(true)} />}
+        {activeTab === "settings" && <SettingsView onOpenMaster={() => setShowMaster("product")} onOpenCategoryMaster={() => setShowMaster("category")} onOpenBankAccounts={() => setShowBank(true)} onOpenStores={() => setShowStores(true)} onOpenReceiptTemplate={() => setShowReceiptTemplate(true)} onOpenPromotions={() => setShowPromotions(true)} onOpenDiscountMaster={() => setShowDiscountMaster(true)} onOpenTables={orderPreferences(activeStore?.orderPreferences).dineInEnabled ? () => setShowTables(true) : undefined} />}
       </main>
 
 

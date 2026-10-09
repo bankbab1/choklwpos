@@ -1,3 +1,4 @@
+import { orderPreferences } from "./orderPreferences";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
@@ -828,6 +829,33 @@ const StoreEditorSheet = ({
                 </div>
               </section>
 
+
+              <section className="space-y-3">
+                <h3 className="text-sm font-semibold">Order preferences</h3>
+                <p className="text-xs text-muted-foreground">Applies to new orders in this branch. Existing orders keep their service type.</p>
+                {(["takeawayEnabled", "dineInEnabled"] as const).map((key) => {
+                  const prefs = orderPreferences(form.orderPreferences);
+                  const other = key === "takeawayEnabled" ? "dineInEnabled" : "takeawayEnabled";
+                  return <div key={key} className="flex items-center justify-between rounded-xl border p-4">
+                    <span className="text-sm font-semibold">{key === "takeawayEnabled" ? "Takeaway" : "Dine-in"}</span>
+                    <Switch aria-label={key === "takeawayEnabled" ? "Enable takeaway" : "Enable dine-in"} checked={prefs[key]} disabled={prefs[key] && !prefs[other]}
+                      onCheckedChange={(enabled) => set("orderPreferences", orderPreferences({ ...prefs, [key]: enabled }))} />
+                  </div>;
+                })}
+                <label className="block text-sm font-semibold">Default order type
+                  <select className="mt-2 block w-full rounded-xl border bg-background p-3" value={orderPreferences(form.orderPreferences).defaultOrderMode}
+                    onChange={(e) => set("orderPreferences", orderPreferences({ ...orderPreferences(form.orderPreferences), defaultOrderMode: e.target.value as "takeaway" | "dine_in" }))}>
+                    {orderPreferences(form.orderPreferences).takeawayEnabled && <option value="takeaway">Takeaway</option>}
+                    {orderPreferences(form.orderPreferences).dineInEnabled && <option value="dine_in">Dine-in</option>}
+                  </select>
+                </label>
+                {orderPreferences(form.orderPreferences).dineInEnabled && <div className="flex items-center justify-between rounded-xl border p-4">
+                  <span className="text-sm font-semibold">Require table for dine-in</span>
+                  <Switch aria-label="Require table for dine-in" checked={orderPreferences(form.orderPreferences).requireTable}
+                    onCheckedChange={(requireTable) => set("orderPreferences", { ...orderPreferences(form.orderPreferences), requireTable })} />
+                </div>}
+                <p className="text-xs text-muted-foreground">At least one order type must remain enabled. Every order still receives an order number.</p>
+              </section>
 
               {/* Visibility */}
               <section className="space-y-3">

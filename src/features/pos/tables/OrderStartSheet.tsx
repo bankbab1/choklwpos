@@ -1,3 +1,5 @@
+import { useStores } from "../store/StoreProvider";
+import { orderPreferences } from "../store/orderPreferences";
 import { useEffect, useMemo, useState } from "react";
 import { Minus, Plus, ShoppingBag, UtensilsCrossed, Users } from "lucide-react";
 import { BaseSheet } from "@/features/pos/shared/BaseSheet";
@@ -26,25 +28,27 @@ interface Props {
 }
 
 const OrderStartSheet = ({ open, isOpening, isClosing, onClose, storeId, initial, busy, onConfirm, onOpenBusy }: Props) => {
+  const { stores } = useStores();
+  const prefs = orderPreferences(stores.find((s) => s.id === storeId)?.orderPreferences);
   const { tablesForStore } = useTables();
   const tables = useMemo(() => tablesForStore(storeId).filter((t) => t.enabled), [tablesForStore, storeId]);
   const zones = useMemo(() => groupByZone(tables), [tables]);
 
-  const [mode, setMode] = useState<ServiceMode>(initial?.mode ?? "dine_in");
+  const [mode, setMode] = useState<ServiceMode>(initial?.mode ?? prefs.defaultOrderMode);
   const [tableId, setTableId] = useState<string | undefined>(initial?.tableId);
-  const [guests, setGuests] = useState<number>(initial?.guests ?? 0);
+  const [guests, setGuests] = useState<number>(initial?.guests ?? 1);
 
   useEffect(() => {
     if (open && !isClosing) {
-      setMode(initial?.mode ?? "dine_in");
+      setMode(initial?.mode ?? prefs.defaultOrderMode);
       setTableId(initial?.tableId);
-      setGuests(initial?.guests ?? 0);
+      setGuests(initial?.guests ?? 1);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const table = tables.find((t) => t.id === tableId);
-  const needsTable = tables.length > 0;
+  const needsTable = prefs.requireTable;
   const canConfirm = mode === "takeaway" || ((!needsTable || !!table) && guests >= 1);
   const overCapacity = table && guests > table.seats;
 
@@ -75,7 +79,7 @@ const OrderStartSheet = ({ open, isOpening, isClosing, onClose, storeId, initial
               {([
                 { id: "dine_in", label: "Dine-in", icon: UtensilsCrossed },
                 { id: "takeaway", label: "Takeaway", icon: ShoppingBag },
-              ] as const).map((m) => {
+              ] as const).filter((m) => m.id === "takeaway" ? prefs.takeawayEnabled || initial?.mode === "takeaway" : prefs.dineInEnabled || initial?.mode === "dine_in").map((m) => {
                 const on = mode === m.id;
                 const Icon = m.icon;
                 return (
@@ -142,11 +146,12 @@ const OrderStartSheet = ({ open, isOpening, isClosing, onClose, storeId, initial
                       <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full border border-dashed border-muted-foreground/50 bg-muted" />Occupied</span>
                     </div>
                   </div>
-                  {!needsTable && (
+                  {tables.length === 0 && (
                     <p className="text-xs text-muted-foreground rounded-xl bg-muted/40 p-3">
-                      No tables set up for this branch. Add them in Settings → Tables.
+                      No tables set up for this branch. Add tables or disable “Require table for dine-in” in the branch preferences.
                     </p>
                   )}
+                  {!needsTable && <Button variant="outline" onClick={() => setTableId(undefined)}>No table</Button>}
                   {zones.map(([zone, list]) => (
                     <div key={zone} className="space-y-2">
                       <p className="text-xs font-bold text-foreground">{zone}</p>
